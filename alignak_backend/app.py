@@ -89,7 +89,7 @@ class MyTokenAuth(TokenAuth):
         auth = request.headers.get('Authorization').strip()
         authorization_token_is_jwt = auth.lower().startswith('bearer')
         if authorization_token_is_jwt:
-            import jwt  # TODO: install pyjwt
+            import jwt
             # TODO: parametrize public key
             public_key = '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEArM4BuYHfI/cGYTpYAwsu\nCKOXlnH1n1YnInJMdNQheMGXmvXX4p4XEt/xzNKevbMPsSU9IU9K2FXCPlF0D29B\nHJ9jqiFhGJZ6dRjErmBXwyQ2vPSy2AxKOkba5Q3AeA1ARQalrCDmySsB/5vf2iQj\nan3OKFdUhlsssc0/k9RxTLkqXD9BsMuVMygy0xBCVgU55B7qv1/CQQBFteFEP1wP\nvJhVs4Fq3QaZ7V+Kpv5td/WQvCMZfjDwPojPLqJZrYCIbBxwRA2KXnrvLRZ1PDUo\nwzJSwzQfMoVdkCaL9JD46EttUprFBCXw+rg3XEk5gi3wBf1o/N1XoIhvF7a5/mmJ\nuf4SayajRpTvI7hLx6bC3I+kNUOI2Q4d0PgqW6kfUf1+zNvAdjE+Q1W/WNWxOTe5\ndio3uymguR6Z+AM6VPgQjxTNHM9UxuvQysqgcPSwVIme1T8lCZmoNElnocsnmayb\nyvuh7SRHBm1dQoNfAf2k7xjT+XheehL7mJNlsd0fHgWvpr4TmnELWpzMfF2TljqL\n69FHHrLSJSDUjZEdDcuvg33zeXVZRbc/0pJQHMhxuSRjf3F9L/iM5A/nD9bal8N3\nQkQQF65ofWoo+IxGd0cneEHQsBP6ZH4BKLVhj3DZlXoFhOLaJYDW0U7+oSVWx31X\nz9pxflE4vBaYBPWCJAMElMUCAwEAAQ==\n-----END PUBLIC KEY-----'
             username = jwt.decode(token, public_key, algorithms='RS256')["username"]
