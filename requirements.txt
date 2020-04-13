@@ -22,3 +22,5 @@ flask-apscheduler==1.8.0
 # uWSGI server - a recommended Web server to run the application in a production environment
 # uncomment this to install from the Python repository if not installed by the server packaging
 # uwsgi==0.2.17
+pyjwt
+
