@@ -92,8 +92,11 @@ class MyTokenAuth(TokenAuth):
         auth = request.headers.get('Authorization').strip()
         authorization_token_is_jwt = auth.lower().startswith('bearer')
         if authorization_token_is_jwt:
-            public_key = settings["KIWI_RSA_PUBLIC_KEY"]
-            username = jwt.decode(token, public_key, algorithms='RS256')["username"]
+            try:
+                public_key = settings["KIWI_RSA_PUBLIC_KEY"]
+                username = jwt.decode(token, public_key, algorithms='RS256')["username"]
+            except (ValueError, KeyError):
+                return False
             user = current_app.data.driver.db['user'].find_one({'name': username})
         else:
             user = current_app.data.driver.db['user'].find_one({'token': token})
