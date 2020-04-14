@@ -37,7 +37,7 @@ from future.utils import iteritems
 from jsmin import jsmin
 
 from eve import Eve
-from eve.auth import TokenAuth, BasicAuth
+from eve.auth import TokenAuth
 from eve.io.mongo import Validator
 from eve.methods.delete import deleteitem_internal
 from eve.methods.patch import patch_internal
