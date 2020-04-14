@@ -18,6 +18,8 @@ import sys
 import time
 import uuid
 
+import jwt
+
 try:
     from urlparse import urlparse
 except ImportError:
@@ -70,6 +72,7 @@ class MyTokenAuth(TokenAuth):
     parent_realms = {}
 
     """Authentication token class"""
+
     def check_auth(self, token, allowed_roles, resource, method):
         # pylint: disable=too-many-locals
         """
@@ -89,9 +92,7 @@ class MyTokenAuth(TokenAuth):
         auth = request.headers.get('Authorization').strip()
         authorization_token_is_jwt = auth.lower().startswith('bearer')
         if authorization_token_is_jwt:
-            import jwt
-            # TODO: parametrize public key
-            public_key = '-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEArM4BuYHfI/cGYTpYAwsu\nCKOXlnH1n1YnInJMdNQheMGXmvXX4p4XEt/xzNKevbMPsSU9IU9K2FXCPlF0D29B\nHJ9jqiFhGJZ6dRjErmBXwyQ2vPSy2AxKOkba5Q3AeA1ARQalrCDmySsB/5vf2iQj\nan3OKFdUhlsssc0/k9RxTLkqXD9BsMuVMygy0xBCVgU55B7qv1/CQQBFteFEP1wP\nvJhVs4Fq3QaZ7V+Kpv5td/WQvCMZfjDwPojPLqJZrYCIbBxwRA2KXnrvLRZ1PDUo\nwzJSwzQfMoVdkCaL9JD46EttUprFBCXw+rg3XEk5gi3wBf1o/N1XoIhvF7a5/mmJ\nuf4SayajRpTvI7hLx6bC3I+kNUOI2Q4d0PgqW6kfUf1+zNvAdjE+Q1W/WNWxOTe5\ndio3uymguR6Z+AM6VPgQjxTNHM9UxuvQysqgcPSwVIme1T8lCZmoNElnocsnmayb\nyvuh7SRHBm1dQoNfAf2k7xjT+XheehL7mJNlsd0fHgWvpr4TmnELWpzMfF2TljqL\n69FHHrLSJSDUjZEdDcuvg33zeXVZRbc/0pJQHMhxuSRjf3F9L/iM5A/nD9bal8N3\nQkQQF65ofWoo+IxGd0cneEHQsBP6ZH4BKLVhj3DZlXoFhOLaJYDW0U7+oSVWx31X\nz9pxflE4vBaYBPWCJAMElMUCAwEAAQ==\n-----END PUBLIC KEY-----'
+            public_key = settings["KIWI_RSA_PUBLIC_KEY"]
             username = jwt.decode(token, public_key, algorithms='RS256')["username"]
             user = current_app.data.driver.db['user'].find_one({'name': username})
         else:
@@ -200,6 +201,7 @@ class MyTokenAuth(TokenAuth):
 
 class MyValidator(Validator):
     """Specific validator for data model fields types extension"""
+
     # pylint: disable=unused-argument
     def _validate_skill_level(self, skill_level, field, value):
         """Validate 'skill_level' field (always valid)"""
@@ -2178,6 +2180,8 @@ if settings.get('LOGGER', None):
             app.logger.debug('Response: %s', _payload.response)
             if 'Exception on /' in _payload.response:
                 app.logger.error('Response exception: %s', _payload.response)
+
+
     app.on_post_GET += log_endpoint
     app.on_post_POST += log_endpoint
     app.on_post_PUT += log_endpoint
@@ -2639,8 +2643,8 @@ def cron_timeseries():
         graphite_db = current_app.data.driver.db['graphite']
         influxdb_db = current_app.data.driver.db['influxdb']
         if timeseriesretention_db.count() > 0:
-            tsc = timeseriesretention_db.find({'graphite': {'$ne': None}})\
-                .sort('_id')\
+            tsc = timeseriesretention_db.find({'graphite': {'$ne': None}}) \
+                .sort('_id') \
                 .limit(settings['SCHEDULER_TIMESERIES_LIMIT'])
             if tsc.count():
                 current_app.logger.warning("[cron_timeseries]: "
@@ -2652,8 +2656,8 @@ def cron_timeseries():
                 lookup = {"_id": data['_id']}
                 deleteitem_internal('timeseriesretention', False, False, **lookup)
 
-            tsc = timeseriesretention_db.find({'influxdb': {'$ne': None}})\
-                .sort('_id')\
+            tsc = timeseriesretention_db.find({'influxdb': {'$ne': None}}) \
+                .sort('_id') \
                 .limit(settings['SCHEDULER_TIMESERIES_LIMIT'])
             if tsc.count():
                 current_app.logger.warning("[cron_timeseries]: "
@@ -2701,6 +2705,8 @@ if settings.get('GRAFANA_DATASOURCE', True):
                         queries[key] = value
                     print("Using Grafana configuration file: %s" % name)
                     return
+
+
     # The default minimum target queries...
     target_queries = {
         "Hosts": {
@@ -2730,6 +2736,7 @@ if settings.get('GRAFANA_DATASOURCE', True):
         get_grafana_configuration(filename, table_fields)
         current_app.logger.info("Grafana - tables: %s", table_fields)
 
+
     @app.route("/search", methods=['OPTIONS', 'POST'])
     def grafana_search(engine='jsonify'):
         # pylint: disable=too-many-locals
@@ -2757,6 +2764,7 @@ if settings.get('GRAFANA_DATASOURCE', True):
             if engine == 'jsonify':
                 return jsonify(resp)
             return json.dumps(resp)
+
 
     @app.route("/query", methods=['OPTIONS', 'POST'])
     def grafana_query(engine='jsonify'):
@@ -2947,6 +2955,7 @@ if settings.get('GRAFANA_DATASOURCE', True):
 
             return json.dumps(resp)
 
+
     @app.after_request
     def after_request(response):
         """Send correct headers for CORS because Eve do not manage the headers
@@ -2957,6 +2966,7 @@ if settings.get('GRAFANA_DATASOURCE', True):
         response.headers.set('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
         # response.headers.set('Access-Control-Allow-Credentials', 'true')
         return response
+
 
     @app.route("/annotations", methods=['OPTIONS', 'POST'])
     def grafana_annotations(engine='jsonify'):
