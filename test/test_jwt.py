@@ -73,3 +73,10 @@ class TestJWT(unittest2.TestCase):
         token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIn0.clWhshrjJR6IGncWNbBaUlzjsCRjN-Jll406ZJmE3wWt9QCsyeSQQYpVWOY0bHZOl4EydC8ko2SY0SYpe9vayx9AL9hSncoylYfdclwJDtmT3Y8Y9aFkJuX4yZjo6MDg7YUsYbvRiBlQucZwCsPC2nraFFhYC3u0E3niHfOZKIOgk_5TpMUoUst_Jvyu3eASomMAs0jiuFHWkbVogXiYwfQThWQzJOXhGx9H-8KPhLJCuD5fpRW1IW5ML_AQKrBcWLjDo3A4GZFwVZNi43XkK1BgHw9stcPPdYepYxLm_4_F6aJGO7SUWlHnqVa89RPcaNpo3TLhQOW01dtrH1khTA"
         headers = {'Authorization': 'Bearer {}'.format(token)}
         assert requests.get(self.endpoint, headers=headers).status_code == 401
+
+    def test_empty_token(self):
+        """
+        Test that we can't login with an empty token
+        """
+        headers = {'Authorization': 'Bearer '}
+        assert requests.get(self.endpoint, headers=headers).status_code == 401
